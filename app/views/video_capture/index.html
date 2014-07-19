@@ -67,6 +67,11 @@
     var data = canvas.toDataURL("image/png");
     console.log(data);
     photo.setAttribute('src', data);
+    $.ajax({
+      type: "POST",
+      url: 'video_capture/index',
+      data: {img: data}
+    })
   }
 
   startbutton.addEventListener('click', function(ev){
