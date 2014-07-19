@@ -1,6 +1,6 @@
 <video id="video"></video>
 <button id="startbutton">Take photo</button>
-<canvas id="canvas"></canvas>
+<canvas id="canvas" width="350px" height="300px"></canvas>
 <img src="http://placekitten.com/g/320/261" id="photo" alt="photo">
 <script>
 (function() {
@@ -11,7 +11,7 @@
       photo        = document.querySelector('#photo'),
       startbutton  = document.querySelector('#startbutton'),
       width = 320,
-      height = 320;
+      height = 240;
 
   navigator.getMedia = ( navigator.getUserMedia ||
                          navigator.webkitGetUserMedia ||
@@ -39,7 +39,9 @@
 
   video.addEventListener('canplay', function(ev){
     if (!streaming) {
-      height = video.videoHeight / (video.videoWidth/width);
+      console.log(height);
+      // height = video.videoHeight / (video.videoWidth/width);
+      console.log(height)
       video.setAttribute('width', width);
       video.setAttribute('height', height);
       canvas.setAttribute('width', width);
@@ -49,11 +51,13 @@
   }, false);
 
   function takepicture() {
+    // height = 240;
     canvas.width = width;
     canvas.height = height;
-    console.log('i am here');
+    console.log(width);
     canvas.getContext('2d').drawImage(video, 0, 0, width, height);
-    var data = canvas.toDataURL();
+    console.log(canvas);
+    var data = canvas.toDataURL("image/png");
     console.log(data);
     photo.setAttribute('src', data);
   }
