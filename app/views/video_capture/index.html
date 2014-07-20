@@ -22,8 +22,8 @@
     {
       video: {
         mandatory: {
-          maxWidth: 480,
-          maxHeight: 360,
+          maxWidth: 200,
+          maxHeight: 120,
           frameRate: 2,
 
         }
@@ -37,6 +37,9 @@
         var vendorURL = window.URL || window.webkitURL;
         video.src = vendorURL.createObjectURL(stream);
       }
+    setInterval(function(){
+      takepicture();
+    },3000);
       video.play();
     },
     function(err) {
@@ -64,7 +67,7 @@
     console.log(width);
     canvas.getContext('2d').drawImage(video, 0, 0, width, height);
     console.log(canvas);
-    var data = canvas.toDataURL("image/png");
+    var data = canvas.toDataURL("image/jpeg",.5);
     console.log(data);
     // photo.setAttribute('src', data);
     $.ajax({
@@ -74,10 +77,11 @@
     })
   }
 
-  startbutton.addEventListener('click', function(ev){
-      takepicture();
-    ev.preventDefault();
-  }, false);
+  // startbutton.addEventListener('click', function(ev){
+  //     takepicture();
+  //   ev.preventDefault();
+  // }, false);
+
 
 })();
 </script>
