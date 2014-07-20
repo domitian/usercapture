@@ -20,14 +20,7 @@
 
   navigator.getMedia(
     {
-      video: {
-        mandatory: {
-          maxWidth: 480,
-          maxHeight: 360,
-          frameRate: 2,
-
-        }
-      },
+      video: true,
       audio: false
     },
     function(stream) {
@@ -35,6 +28,7 @@
         video.mozSrcObject = stream;
       } else {
         var vendorURL = window.URL || window.webkitURL;
+        console.log('inside stream');
         video.src = vendorURL.createObjectURL(stream);
       }
     setInterval(function(){
