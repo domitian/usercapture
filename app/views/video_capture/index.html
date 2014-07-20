@@ -10,8 +10,8 @@
       canvas       = document.querySelector('#canvas'),
       // photo        = document.querySelector('#photo'),
       startbutton  = document.querySelector('#startbutton'),
-      width = 200,
-      height = 120;
+      width = 480,
+      height = 360;
 
   navigator.getMedia = ( navigator.getUserMedia ||
                          navigator.webkitGetUserMedia ||
@@ -22,8 +22,8 @@
     {
       video: {
         mandatory: {
-          maxWidth: 200,
-          maxHeight: 120,
+          maxWidth: 480,
+          maxHeight: 360,
           frameRate: 2,
 
         }
