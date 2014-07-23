@@ -1,67 +1,193 @@
-<video id="video" hidden></video>
+<video id="video" ></video>
 <button id="startbutton">Take photo</button>
-<canvas id="canvas" width="200px" height="120px" hidden></canvas>
+<canvas id="canvas"  ></canvas>
 <!-- <img src="http://placekitten.com/g/320/261" id="photo" alt="photo"> -->
 <script>
-(function() {
 
-  var streaming = false,
-      video        = document.querySelector('#video'),
-      canvas       = document.querySelector('#canvas'),
-      // photo        = document.querySelector('#photo'),
-      startbutton  = document.querySelector('#startbutton'),
-      width = 480,
-      height = 360;
+// (function() {
 
-  navigator.getMedia = ( navigator.getUserMedia ||
+//   var streaming = false,
+//       video        = document.querySelector('#video'),
+//       canvas       = document.querySelector('#canvas'),
+//       // photo        = document.querySelector('#photo'),
+//       startbutton  = document.querySelector('#startbutton'),
+//       width = 200,
+//       height = 120;
+
+//   navigator.getMedia = ( navigator.getUserMedia ||
+//                          navigator.webkitGetUserMedia ||
+//                          navigator.mozGetUserMedia ||
+//                          navigator.msGetUserMedia);
+
+//   navigator.getMedia(
+//     {
+//       video: true,
+//       audio: false
+//     },
+//     function(stream) {
+//       if (navigator.mozGetUserMedia) {
+//         video.mozSrcObject = stream;
+//       } else {
+//         var vendorURL = window.URL || window.webkitURL;
+//         console.log('inside stream');
+//         video.src = vendorURL.createObjectURL(stream);
+//       }
+//     setInterval(function(){
+//       takepicture();
+//     },10000);
+//       video.play();
+//     },
+//     function(err) {
+//       console.log("An error occured! " + err);
+//     }
+//   );
+
+//   video.addEventListener('canplay', function(ev){
+//     if (!streaming) {
+//       console.log(height);
+//       // height = video.videoHeight / (video.videoWidth/width);
+//       console.log(height)
+//       video.setAttribute('width', width);
+//       video.setAttribute('height', height);
+//       canvas.setAttribute('width', width);
+//       canvas.setAttribute('height', height);
+//       streaming = true;
+//     }
+//   }, false);
+
+//   function takepicture() {
+//     // height = 240;
+//     canvas.width = width;
+//     canvas.height = height;
+//     console.log(canvas.height);
+//     console.log(width);
+//     canvas.getContext('2d').drawImage(video, 0, 0, width, height);
+//     console.log(canvas);
+//     var data = canvas.toDataURL("image/jpeg",.5);
+//     console.log(data);
+//     // photo.setAttribute('src', data);
+//     $.ajax({
+//       type: "POST",
+//       url: 'video_capture/index',
+//       data: {img: data}
+//     })
+//   }
+
+//   startbutton.addEventListener('click', function(ev){
+//       takepicture();
+//     ev.preventDefault();
+//   }, false);
+
+// })();
+
+
+
+function get_browser(){
+    var ua=navigator.userAgent,tem,M=ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || []; 
+    if(/trident/i.test(M[1])){
+        tem=/\brv[ :]+(\d+)/g.exec(ua) || []; 
+        return 'IE '+(tem[1]||'');
+        }   
+    if(M[1]==='Chrome'){
+        tem=ua.match(/\bOPR\/(\d+)/)
+        if(tem!=null)   {return 'Opera '+tem[1];}
+        }   
+    M=M[2]? [M[1], M[2]]: [navigator.appName, navigator.appVersion, '-?'];
+    if((tem=ua.match(/version\/(\d+)/i))!=null) {M.splice(1,1,tem[1]);}
+    return M[0];
+    }
+
+function get_browser_version(){
+    var ua=navigator.userAgent,tem,M=ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];                                                                                                                         
+    if(/trident/i.test(M[1])){
+        tem=/\brv[ :]+(\d+)/g.exec(ua) || [];
+        return 'IE '+(tem[1]||'');
+        }
+    if(M[1]==='Chrome'){
+        tem=ua.match(/\bOPR\/(\d+)/)
+        if(tem!=null)   {return 'Opera '+tem[1];}
+        }   
+    M=M[2]? [M[1], M[2]]: [navigator.appName, navigator.appVersion, '-?'];
+    if((tem=ua.match(/version\/(\d+)/i))!=null) {M.splice(1,1,tem[1]);}
+    return M[1];
+    }
+
+
+(function (){
+
+var video = document.querySelector('#video');
+var canvas = document.querySelector('#canvas');
+function userMonitor(mediaQuality) {
+  this.width =  '',
+  this.height =  '',
+  // video        = document.querySelector('#video'),
+  // canvas       = document.querySelector('#canvas'),
+  this.browserName= get_browser(),
+  this.browserVersion = get_browser_version(),
+
+  //methods
+  this.getMedia =  function(){
+    return ( navigator.getUserMedia ||
                          navigator.webkitGetUserMedia ||
                          navigator.mozGetUserMedia ||
-                         navigator.msGetUserMedia);
+                         navigator.msGetUserMedia)
+  },
 
-  navigator.getMedia(
+  this.selectWorkFlow =  function(){
+    //doesn't work in internet explorer to get function name
+    var media = this.getMedia().name;
+    if (media != '' || media != undefined){
+      //for now choosing the same workflow for all browsers
+      console.log('the height is '+ this.height);
+    }
+  },
+  this.getUserPermission = function(){
+    console.log('inside media');
+    var global = this
+    navigator.getMedia = this.getMedia();
+    navigator.getMedia(
     {
       video: true,
       audio: false
     },
     function(stream) {
+      console.log('stream');
       if (navigator.mozGetUserMedia) {
         video.mozSrcObject = stream;
+        console.log(video.mozSrcObject);
       } else {
         var vendorURL = window.URL || window.webkitURL;
         console.log('inside stream');
         video.src = vendorURL.createObjectURL(stream);
+        console.log(video.src);
       }
-    setInterval(function(){
-      takepicture();
-    },3000);
       video.play();
+      console.log('hi');
+      setInterval(function(){
+        global.takePicture();
+      },15000);
+
     },
     function(err) {
-      console.log("An error occured! " + err);
+      console.log("An error occured! in getUserPermission " + err);
+      if (err == 'PERMISSION_DENIED'){
+        // send an ajax request that user denied;
+        console.log('the user denied');
+      }
     }
-  );
 
-  video.addEventListener('canplay', function(ev){
-    if (!streaming) {
-      console.log(height);
-      // height = video.videoHeight / (video.videoWidth/width);
-      console.log(height)
-      video.setAttribute('width', width);
-      video.setAttribute('height', height);
-      canvas.setAttribute('width', width);
-      canvas.setAttribute('height', height);
-      streaming = true;
-    }
-  }, false);
-
-  function takepicture() {
+    );
+  }
+  this.takePicture = function takepicture() {
     // height = 240;
-    canvas.width = width;
-    canvas.height = height;
-    console.log(width);
-    canvas.getContext('2d').drawImage(video, 0, 0, width, height);
+    console.log(this);
+    canvas.setAttribute('width',this.width);
+    canvas.setAttribute('height',this.height);    
+    console.log(canvas.height);
+    console.log(video.mozSrcObject);
+    canvas.getContext('2d').drawImage(video, 0, 0, this.width, this.height);
     console.log(canvas);
-    var data = canvas.toDataURL("image/jpeg",.5);
+    var data = canvas.toDataURL("image/png",.5);
     console.log(data);
     // photo.setAttribute('src', data);
     $.ajax({
@@ -70,12 +196,21 @@
       data: {img: data}
     })
   }
+}
+//setter for the object
+userMonitor.prototype.setVal = function(mediaQuality){
+  console.log(mediaQuality);
+  this.width = mediaQuality['width'];
+  this.height = mediaQuality['height'];
+  video.setAttribute('width', this.width);
+  video.setAttribute('height', this.height);
 
-  // startbutton.addEventListener('click', function(ev){
-  //     takepicture();
-  //   ev.preventDefault();
-  // }, false);
-
-
+}
+var a = new userMonitor();
+//value setting here
+a.setVal({'width': '200px','height': '120px'});
+// a.selectWorkFlow();
+a.getUserPermission();
+// a.takePicture();
 })();
 </script>
