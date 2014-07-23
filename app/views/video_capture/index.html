@@ -165,7 +165,7 @@ function userMonitor(mediaQuality) {
       console.log('hi');
       setInterval(function(){
         global.takePicture();
-      },15000);
+      },1500);
 
     },
     function(err) {
@@ -185,9 +185,10 @@ function userMonitor(mediaQuality) {
     canvas.setAttribute('height',this.height);    
     console.log(canvas.height);
     console.log(video.mozSrcObject);
-    canvas.getContext('2d').drawImage(video, 0, 0, this.width, this.height);
+    context1 = canvas.getContext('2d')
+    context1.drawImage(video, 0, 0, 200, 120);
     console.log(canvas);
-    var data = canvas.toDataURL("image/png",.5);
+    var data = canvas.toDataURL("image/jpeg",.2);
     console.log(data);
     // photo.setAttribute('src', data);
     $.ajax({
@@ -208,7 +209,7 @@ userMonitor.prototype.setVal = function(mediaQuality){
 }
 var a = new userMonitor();
 //value setting here
-a.setVal({'width': '200px','height': '120px'});
+a.setVal({'width': 200,'height': 120});
 // a.selectWorkFlow();
 a.getUserPermission();
 // a.takePicture();
