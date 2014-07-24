@@ -42,20 +42,36 @@ function get_browser_version(){
 // var video = document.querySelector('#video');
 // var canvas = document.querySelector('#canvas');
 function userMonitor(mediaQuality) {
-  this.width =  '';
-  this.height =  '';
+  var width =  '';
+  var height =  '';
   var cameraTimer = '';
   var streaming = false;
-  this.quality = ''; //on a scale of 0 - 1
-  this.video        = '';
-  this.canvas       = '',
-  this.frequencyTimer = '';
-  this.urlToPost = '';
-  this.streamTimer = '';
-  // this.canvasId = '',
-  // this.videoId = '',
+  var quality = ''; //on a scale of 0 - 1
+  var vidStream        = '';
+  var canvas       = '';
+  var frequencyTimer = '';
+  var urlToPost = '';
+  var streamTimer = '';
+  // canvasId = '',
+  // vidStreamId = '',
   this.browserName= get_browser();
   this.browserVersion = get_browser_version();
+  //constructor
+  this.setVal = function(mediaQuality,selectorvidStreamCanvas,urlTo){
+    // console.log(mediaQuality);
+    width = mediaQuality['width'];
+    height = mediaQuality['height'];
+    canvas = document.querySelector(selectorvidStreamCanvas['canvas']);
+    vidStream = document.querySelector(selectorvidStreamCanvas['vidStream']);
+    // console.log(vidStream);
+    vidStream.setAttribute('width', width);
+    vidStream.setAttribute('height', height);
+    // vidStream.watch();
+    // console.log(vidStream);
+    quality = mediaQuality['quality'];
+    urlToPost = urlTo;
+
+  };
 
   //methods
   this.getMedia =  function(){
@@ -70,13 +86,13 @@ function userMonitor(mediaQuality) {
     var media = this.getMedia().name;
     if (media != '' || media != undefined){
       //for now choosing the same workflow for all browsers
-      console.log('the height is '+ this.height);
+      // console.log('the height is '+ height);
     }
   },
   this.getUserPermission = function(){
-    console.log('inside media');
+    // console.log('inside media');
     var global = this;
-
+    // console.log(vidStream);
     navigator.getMedia = this.getMedia();
     navigator.getMedia(
     {
@@ -84,17 +100,18 @@ function userMonitor(mediaQuality) {
       audio: false
     },
     function(stream) {
-      console.log('stream');
+      // console.log(vidStream);
       if (navigator.mozGetUserMedia) {
-        global.video.mozSrcObject = stream;
-        console.log(global.video.mozSrcObject);
+        vidStream.mozSrcObject = stream;
+        // console.log(vidStream);
       } else {
         var vendorURL = window.URL || window.webkitURL;
-        console.log('inside stream');
-        global.video.src = vendorURL.createObjectURL(stream);
-        console.log(global.video.src);
+        // console.log('inside stream');
+        console.log(stream);
+        vidStream.src = vendorURL.createObjectURL(stream);
+        // console.log(vidStream.src);
       }
-      global.video.play();
+      vidStream.play();
       streaming = true;
       cameraTimer = setInterval(function(){
         checkIfCamIsOff();
@@ -119,19 +136,16 @@ function userMonitor(mediaQuality) {
     var global = this;
     if (streaming){
       console.log(this);
-      this.canvas.setAttribute('width',this.width);
-      this.canvas.setAttribute('height',this.height);    
-      console.log(this.canvas.height);
-      console.log(this.video.mozSrcObject);
-      context1 = this.canvas.getContext('2d')
-      context1.drawImage(this.video, 0, 0, this.width, this.height);
-      console.log(this.canvas);
-      var data = this.canvas.toDataURL("image/jpeg",this.quality);
-      console.log(data);
+      canvas.setAttribute('width',width);
+      canvas.setAttribute('height',height);    
+      console.log(vidStream.mozSrcObject);
+      context1 = canvas.getContext('2d')
+      context1.drawImage(vidStream, 0, 0, width, height);
+      var data = canvas.toDataURL("image/jpeg",quality);
       // photo.setAttribute('src', data);
       $.ajax({
         type: "POST",
-        url: global.urlToPost,
+        url: urlToPost,
         data: {img: data}
       })
     }
@@ -143,33 +157,44 @@ function userMonitor(mediaQuality) {
   this.startTimedPics = function(frequency){
     var global = this;
     if (frequency >= 1000 && streaming){
-      this.frequencyTimer = setInterval(function(){
+      frequencyTimer = setInterval(function(){
         global.takePicture();
       },frequency);     
     }
 
   },
   this.stopTimedPics = function(){
-    if (this.frequencyTimer != ''){
-      clearInterval(this.frequencyTimer);
-      this.frequencyTimer = '';
+    if (frequencyTimer != ''){
+      clearInterval(frequencyTimer);
+      frequencyTimer = '';
     }
     else{
       console.log('No timer has been set');
     }
   };
+
   var checkIfCamIsOff = function(){
-    var oldtime = this.streamTimer;
-    if (this.video.src == null || this.video.src == ''){
-      this.streamTimer = this.video.mozSrcObject.currentTime;
+    var oldtime = streamTimer;
+    if (vidStream.mozSrcObject != undefined){
+      streamTimer = vidStream.mozSrcObject.currentTime;
     }
     else{
-      this.streamTimer = this.video.src.currentTime;
+      if (vidStream.ended == true){
+        streaming = false;
+
+        clearInterval(cameraTimer);
+        return false;
+      }
+      else{
+        streaming = true;
+        return true;
+      }
+
     }
-    if (this.streamTimer == oldtime ){
+    if (streamTimer == oldtime && streamTimer != '' ){
       clearInterval(cameraTimer);
       streaming = false;
-      alert('You disabled the camera');
+      // alert('You disabled the camera');
       return false;
 
     }
@@ -179,24 +204,12 @@ function userMonitor(mediaQuality) {
   }
 }
 //setter for the object
-userMonitor.prototype.setVal = function(mediaQuality,selectorVideoCanvas,urlToPost){
-  console.log(mediaQuality);
-  this.width = mediaQuality['width'];
-  this.height = mediaQuality['height'];
-  this.canvas = document.querySelector(selectorVideoCanvas['canvas']);
-  this.video = document.querySelector(selectorVideoCanvas['video']);
-  this.video.setAttribute('width', this.width);
-  this.video.setAttribute('height', this.height);
-  this.quality = mediaQuality['quality'];
-  this.urlToPost = urlToPost;
 
-}
 var a = new userMonitor();
 //value setting here
-a.setVal({'width': 200,'height': 120,'quality': 0.5},{'canvas': '#canvas','video': '#video'},'video_capture/index');
+a.setVal({'width': 200,'height': 120,'quality': 0.5},{'canvas': '#canvas','vidStream': '#video'},'video_capture/index');
 // a.selectWorkFlow();
 a.getUserPermission();
-console.log(a);
-// a.takePicture();
+
 
 </script>
