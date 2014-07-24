@@ -44,8 +44,14 @@ function get_browser_version(){
 function userMonitor(mediaQuality) {
   this.width =  '',
   this.height =  '',
-  this.video        = document.querySelector('#video'),
-  this.canvas       = document.querySelector('#canvas'),
+  this.quality = '', //on a scale of 0 - 1
+  this.video        = '',
+  this.canvas       = '',
+  this.streaming = false;
+  this.frequencyTimer = '',
+  this.urlToPost = '',
+  // this.canvasId = '',
+  // this.videoId = '',
   this.browserName= get_browser(),
   this.browserVersion = get_browser_version(),
 
@@ -67,7 +73,8 @@ function userMonitor(mediaQuality) {
   },
   this.getUserPermission = function(){
     console.log('inside media');
-    var global = this
+    var global = this;
+
     navigator.getMedia = this.getMedia();
     navigator.getMedia(
     {
@@ -86,56 +93,85 @@ function userMonitor(mediaQuality) {
         console.log(global.video.src);
       }
       global.video.play();
-      console.log('hi');
-      setInterval(function(){
-        global.takePicture();
-      },1500);
+      global.streaming = true;
 
     },
     function(err) {
       console.log("An error occured! in getUserPermission " + err);
       if (err == 'PERMISSION_DENIED'){
         // send an ajax request that user denied;
-        console.log('the user denied');
+        alert('the user denied');
+      }
+      else{
+        alert("your browser doesn't support getUserMedia");
       }
     }
 
     );
-  }
+  },
   this.takePicture = function takepicture() {
     // height = 240;
-    console.log(this);
-    this.canvas.setAttribute('width',this.width);
-    this.canvas.setAttribute('height',this.height);    
-    console.log(this.canvas.height);
-    console.log(this.video.mozSrcObject);
-    context1 = this.canvas.getContext('2d')
-    context1.drawImage(this.video, 0, 0, 200, 120);
-    console.log(this.canvas);
-    var data = this.canvas.toDataURL("image/jpeg",.5);
-    console.log(data);
-    // photo.setAttribute('src', data);
-    $.ajax({
-      type: "POST",
-      url: 'video_capture/index',
-      data: {img: data}
-    })
+    var global = this;
+    if (this.streaming){
+      console.log(this);
+      this.canvas.setAttribute('width',this.width);
+      this.canvas.setAttribute('height',this.height);    
+      console.log(this.canvas.height);
+      console.log(this.video.mozSrcObject);
+      context1 = this.canvas.getContext('2d')
+      context1.drawImage(this.video, 0, 0, this.width, this.height);
+      console.log(this.canvas);
+      var data = this.canvas.toDataURL("image/jpeg",this.quality);
+      console.log(data);
+      // photo.setAttribute('src', data);
+      $.ajax({
+        type: "POST",
+        url: global.urlToPost,
+        data: {img: data}
+      })
+    }
+    else{
+      console.log('sorry streaming is not available, please get permission first')
+    }
+  },
+  this.startTimedPics = function(frequency){
+    var global = this;
+    if (frequency >= 1000 && this.streaming){
+      this.frequencyTimer = setInterval(function(){
+        global.takePicture();
+      },frequency);     
+    }
+
+  },
+  this.stopTimedPics = function(){
+    if (this.frequencyTimer != ''){
+      clearInterval(this.frequencyTimer);
+      this.frequencyTimer = '';
+    }
+    else{
+      console.log('No timer has been set');
+    }
   }
 }
 //setter for the object
-userMonitor.prototype.setVal = function(mediaQuality){
+userMonitor.prototype.setVal = function(mediaQuality,selectorVideoCanvas,urlToPost){
   console.log(mediaQuality);
   this.width = mediaQuality['width'];
   this.height = mediaQuality['height'];
+  this.canvas = document.querySelector(selectorVideoCanvas['canvas']);
+  this.video = document.querySelector(selectorVideoCanvas['video']);
   this.video.setAttribute('width', this.width);
   this.video.setAttribute('height', this.height);
+  this.quality = mediaQuality['quality'];
+  this.urlToPost = urlToPost;
 
 }
 var a = new userMonitor();
 //value setting here
-a.setVal({'width': 200,'height': 120});
+a.setVal({'width': 200,'height': 120,'quality': 0.5},{'canvas': '#canvas','video': '#video'},'video_capture/index');
 // a.selectWorkFlow();
 a.getUserPermission();
+console.log(a);
 // a.takePicture();
 
 </script>
