@@ -38,15 +38,14 @@ function get_browser_version(){
     }
 
 
-(function (){
 
 // var video = document.querySelector('#video');
-var canvas = document.querySelector('#canvas');
+// var canvas = document.querySelector('#canvas');
 function userMonitor(mediaQuality) {
   this.width =  '',
   this.height =  '',
   this.video        = document.querySelector('#video'),
-  // this.canvas       = document.querySelector('#canvas'),
+  this.canvas       = document.querySelector('#canvas'),
   this.browserName= get_browser(),
   this.browserVersion = get_browser_version(),
 
@@ -106,14 +105,14 @@ function userMonitor(mediaQuality) {
   this.takePicture = function takepicture() {
     // height = 240;
     console.log(this);
-    canvas.setAttribute('width',this.width);
-    canvas.setAttribute('height',this.height);    
-    console.log(canvas.height);
+    this.canvas.setAttribute('width',this.width);
+    this.canvas.setAttribute('height',this.height);    
+    console.log(this.canvas.height);
     console.log(this.video.mozSrcObject);
-    context1 = canvas.getContext('2d')
+    context1 = this.canvas.getContext('2d')
     context1.drawImage(this.video, 0, 0, 200, 120);
-    console.log(canvas);
-    var data = canvas.toDataURL("image/jpeg",.2);
+    console.log(this.canvas);
+    var data = this.canvas.toDataURL("image/jpeg",.5);
     console.log(data);
     // photo.setAttribute('src', data);
     $.ajax({
@@ -128,8 +127,8 @@ userMonitor.prototype.setVal = function(mediaQuality){
   console.log(mediaQuality);
   this.width = mediaQuality['width'];
   this.height = mediaQuality['height'];
-  video.setAttribute('width', this.width);
-  video.setAttribute('height', this.height);
+  this.video.setAttribute('width', this.width);
+  this.video.setAttribute('height', this.height);
 
 }
 var a = new userMonitor();
@@ -138,5 +137,5 @@ a.setVal({'width': 200,'height': 120});
 // a.selectWorkFlow();
 a.getUserPermission();
 // a.takePicture();
-})();
+
 </script>
