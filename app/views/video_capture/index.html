@@ -42,18 +42,20 @@ function get_browser_version(){
 // var video = document.querySelector('#video');
 // var canvas = document.querySelector('#canvas');
 function userMonitor(mediaQuality) {
-  this.width =  '',
-  this.height =  '',
-  this.quality = '', //on a scale of 0 - 1
-  this.video        = '',
+  this.width =  '';
+  this.height =  '';
+  var cameraTimer = '';
+  var streaming = false;
+  this.quality = ''; //on a scale of 0 - 1
+  this.video        = '';
   this.canvas       = '',
-  this.streaming = false;
-  this.frequencyTimer = '',
-  this.urlToPost = '',
+  this.frequencyTimer = '';
+  this.urlToPost = '';
+  this.streamTimer = '';
   // this.canvasId = '',
   // this.videoId = '',
-  this.browserName= get_browser(),
-  this.browserVersion = get_browser_version(),
+  this.browserName= get_browser();
+  this.browserVersion = get_browser_version();
 
   //methods
   this.getMedia =  function(){
@@ -93,7 +95,10 @@ function userMonitor(mediaQuality) {
         console.log(global.video.src);
       }
       global.video.play();
-      global.streaming = true;
+      streaming = true;
+      cameraTimer = setInterval(function(){
+        checkIfCamIsOff();
+      },2000);   
 
     },
     function(err) {
@@ -112,7 +117,7 @@ function userMonitor(mediaQuality) {
   this.takePicture = function takepicture() {
     // height = 240;
     var global = this;
-    if (this.streaming){
+    if (streaming){
       console.log(this);
       this.canvas.setAttribute('width',this.width);
       this.canvas.setAttribute('height',this.height);    
@@ -131,12 +136,13 @@ function userMonitor(mediaQuality) {
       })
     }
     else{
+      clearInterval(cameraTimer);
       console.log('sorry streaming is not available, please get permission first')
     }
   },
   this.startTimedPics = function(frequency){
     var global = this;
-    if (frequency >= 1000 && this.streaming){
+    if (frequency >= 1000 && streaming){
       this.frequencyTimer = setInterval(function(){
         global.takePicture();
       },frequency);     
@@ -150,6 +156,25 @@ function userMonitor(mediaQuality) {
     }
     else{
       console.log('No timer has been set');
+    }
+  };
+  var checkIfCamIsOff = function(){
+    var oldtime = this.streamTimer;
+    if (this.video.src == null || this.video.src == ''){
+      this.streamTimer = this.video.mozSrcObject.currentTime;
+    }
+    else{
+      this.streamTimer = this.video.src.currentTime;
+    }
+    if (this.streamTimer == oldtime ){
+      clearInterval(cameraTimer);
+      streaming = false;
+      alert('You disabled the camera');
+      return false;
+
+    }
+    else{
+      return true;
     }
   }
 }
