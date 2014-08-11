@@ -1,5 +1,15 @@
-<canvas id="inputCanvas" width="320" height="240"></canvas>
-<video id="inputVideo" autoplay loop hidden></video>
+<canvas id="inputCanvas" width="320" height="240" hidden></canvas>
+<div class="container">
+
+
+<video id="inputVideo" width="160" height="120"  autoplay loop style="postion: absolute; z-index: -2;" >
+
+
+</video>
+
+</div>
+
+
 <script type="text/javascript">
   var videoInput = document.getElementById('inputVideo');
   var canvasInput = document.getElementById('inputCanvas');
@@ -7,7 +17,7 @@
   var yaxis = '';
   var width_rec = '';
   var height_rec = '';
-  var htracker = new headtrackr.Tracker({ui: false,detectionInterval: 100});
+  var htracker = new headtrackr.Tracker({ui: false,detectionInterval: 350, headPostion: false, fadeVideo: true});
   htracker.init(videoInput, canvasInput);
   htracker.start();
 
@@ -22,13 +32,21 @@
       yaxis = event.y;
       width_rec = event.width;
       height_rec = event.height;
-      console.log('inside events');
       var c=document.getElementById("inputCanvas");
       var ctx=c.getContext("2d");
       var arr = calculateHeightWidth(xaxis,yaxis,height_rec,width_rec);
       xaxis = arr[0];
       yaxis = arr[1];
-      ctx.strokeRect(xaxis,yaxis,width_rec,height_rec); 
+      console.log(xaxis,yaxis,width_rec,height_rec);
+      // ctx.strokeRect(xaxis,yaxis,width_rec,height_rec); 
     }
   );
+	document.addEventListener('headtrackrStatus', 
+	  function (event) {
+	    if (event.status == "no camera") {
+	      console.log("getUserMedia is supported!");
+	      //trigger ajax request here
+	    }
+	  }
+	);
 </script>
