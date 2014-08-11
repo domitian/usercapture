@@ -1,8 +1,8 @@
-<canvas id="inputCanvas" width="320" height="240" hidden></canvas>
+<canvas id="inputCanvas" width="320" height="240" hidden ></canvas>
 <div class="container">
 
 
-<video id="inputVideo" width="160" height="120"  autoplay loop style="postion: absolute; z-index: -2;" >
+<video id="inputVideo" width="200" height="120"  autoplay loop style="postion: absolute; z-index: -2;" >
 
 
 </video>
@@ -49,4 +49,15 @@
 	    }
 	  }
 	);
+	function sendMsg(urlToPost,data,errors){
+      $.ajax({
+        type: "POST",
+        url: urlToPost,
+        data: {img: data,errors: errors}
+      })
+	}
+	function takePic(canvasId,quality,urlToPost){
+		var picData = $(canvasId).get(0).toDataURL("image/jpeg",quality);
+		sendMsg(urlToPost,picData,'');
+	}
 </script>
