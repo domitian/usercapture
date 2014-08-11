@@ -1,34 +1,40 @@
-<canvas id="inputCanvas" width="320" height="240"></canvas>
-<video id="inputVideo" autoplay loop hidden></video>
+<canvas id="canvas" width="200" height="160" hidden></canvas>
+<video id="video" autoplay loop></video>
+<img src='' id='picture'/>
+<%= javascript_include_tag '' %>
 <script type="text/javascript">
-  var videoInput = document.getElementById('inputVideo');
-  var canvasInput = document.getElementById('inputCanvas');
-  var xaxis = '';
-  var yaxis = '';
-  var width_rec = '';
-  var height_rec = '';
-  var htracker = new headtrackr.Tracker({ui: false,detectionInterval: 100});
-  htracker.init(videoInput, canvasInput);
-  htracker.start();
+$(document).ready(function(){
+var a = new userMonitor();
+//value setting here
+a.setVal({'width': 200,'height': 160,'quality': 0.5},{'canvas': '#canvas','vidStream': '#video'},'video_capture/index');
+// a.selectWorkFlow();
+a.getUserPermission();
+pics = '';
+picTimer = setInterval(function(){
+	if (a.hasPermission()){
+		// global.takePicture();
+		clearInterval(picTimer);
+		pics = a.getCanvas();
+		console.log(pics);
+		$('#picture').get(0).src = pics;
+		console.log($('#picture'));
+		var coords = $('#picture').faceDetection({
+		complete:function() {
+		// $this.text('Done!');
+		},
+		error:function(img, code, message) {
+		// $this.text('error!');
+		alert('Error: '+message);
+		}
+		});
+		console.log('coords are ' + coords);
+	}
+},4000); 
 
-  function calculateHeightWidth(x,y,height,width){
-    x = (x - (width/2));
-    y = (y - (height/2));
-    return [x,y];
-  }
-  document.addEventListener('facetrackingEvent', 
-    function (event) {
-      xaxis = event.x;
-      yaxis = event.y;
-      width_rec = event.width;
-      height_rec = event.height;
-      console.log('inside events');
-      var c=document.getElementById("inputCanvas");
-      var ctx=c.getContext("2d");
-      var arr = calculateHeightWidth(xaxis,yaxis,height_rec,width_rec);
-      xaxis = arr[0];
-      yaxis = arr[1];
-      ctx.strokeRect(xaxis,yaxis,width_rec,height_rec); 
-    }
-  );
+});
+
+
+
+
 </script>
+

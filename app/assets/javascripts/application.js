@@ -14,3 +14,7 @@
 //= require jquery_ujs
 //= require turbolinks
 //= require_tree .
+
+self.onMessage = function(event){
+	postMessage("hi,"+ event.data);
+}
