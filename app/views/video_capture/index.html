@@ -1,8 +1,8 @@
-<canvas id="inputCanvas" width="320" height="240" hidden ></canvas>
+<canvas id="inputCanvas" width="320px" height="240px" hidden ></canvas>
 <div class="container">
 
-
-<video id="inputVideo" width="200" height="120"  autoplay loop style="postion: absolute; z-index: -2;" >
+<div id="video_overlays" ></div>
+<video id="inputVideo" width="160px" height="120px"  autoplay loop style="postion: absolute; z-index: -2;" >
 
 
 </video>
@@ -17,6 +17,9 @@
   var yaxis = '';
   var width_rec = '';
   var height_rec = '';
+  var arr = '';
+  var ratio = 2;
+  var overlay = $('#video_overlays');
   var htracker = new headtrackr.Tracker({ui: false,detectionInterval: 350, headPostion: false, fadeVideo: true});
   htracker.init(videoInput, canvasInput);
   htracker.start();
@@ -26,6 +29,12 @@
     y = (y - (height/2));
     return [x,y];
   }
+  function normalizeHeightWidth(arr,ratio){
+    for (var i=0; i<arr.length;i++){
+      arr[i] = arr[i]/ratio;
+    }
+    return arr;
+  }
   document.addEventListener('facetrackingEvent', 
     function (event) {
       xaxis = event.x;
@@ -34,10 +43,17 @@
       height_rec = event.height;
       var c=document.getElementById("inputCanvas");
       var ctx=c.getContext("2d");
-      var arr = calculateHeightWidth(xaxis,yaxis,height_rec,width_rec);
+      arr = calculateHeightWidth(xaxis,yaxis,height_rec,width_rec);
+      arr = normalizeHeightWidth(arr,ratio);
       xaxis = arr[0];
       yaxis = arr[1];
-      console.log(xaxis,yaxis,width_rec,height_rec);
+      overlay.css({
+        "margin-left": xaxis,
+        "margin-top": yaxis,
+        "height": height_rec/ratio,
+        "width": width_rec/ratio
+      })
+      // console.log(xaxis,yaxis,width_rec,height_rec);
       // ctx.strokeRect(xaxis,yaxis,width_rec,height_rec); 
     }
   );
@@ -47,6 +63,10 @@
 	      console.log("getUserMedia is supported!");
 	      //trigger ajax request here
 	    }
+      if (event.status == "detecting") {
+        console.log('running');
+        $('#inputVideo').get(0).setAttribute('width','160px');
+      }
 	  }
 	);
 	function sendMsg(urlToPost,data,errors){
